@@ -1,0 +1,22 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper
+        PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+        "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.lee.DepartmentMapper">
+
+
+
+    <resultMap id="myDep" type="com.lee.Department">
+        <id column="id" property="id"></id>
+        <result column="dept_name" property="deptName"></result>
+        <collection property="employees" select="com.lee.EmployeeMapper.getEmpByDeptId" column="id"></collection>
+     </resultMap>
+    <select id="getDep" resultMap="myDep" parameterType="java.lang.Integer">
+        select * from mybatis.tbl_dept where id=#{id}
+    </select>
+
+
+
+</mapper>
+
+

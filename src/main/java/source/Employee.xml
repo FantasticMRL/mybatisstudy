@@ -1,0 +1,195 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper
+        PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+        "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.lee.EmployeeMapper">
+
+<!--    <cache type="org.mybatis.caches.ehcache.EhcacheCache"/>-->
+
+
+    <insert id="addEmp" useGeneratedKeys="true"
+            keyProperty="id">
+          insert into tbl_employee(last_name, email, gender, d_id)
+          values (#{lastName},#{email},#{gender},#{dId})
+    </insert>
+
+    <delete id="del"></delete>
+
+    <update id="update">
+
+
+    </update>
+
+    <select id="selectEmp" resultType="com.lee.Employee">
+        select *   from tbl_employee where id = #{id}
+  </select>
+    <select id="getByIdAndLastName" resultType="com.lee.Employee">
+
+        select * from mybatis.tbl_employee where id=#{param1} and last_name =#{param2}
+
+    </select>
+    <select id="getByLastNameLike" resultType="com.lee.Employee">
+
+        select * from mybatis.tbl_employee where last_name like #{lastName}
+
+    </select>
+    <select id="getEmpById" resultType="java.util.Map" parameterType="java.lang.Integer">
+
+ select * from mybatis.tbl_employee where id=#{id}
+
+    </select>
+    <select id="getByLastNameLike2" resultType="com.lee.Employee">
+        select * from mybatis.tbl_employee where last_name like #{lastName}
+    </select>
+
+
+    <resultMap id="emp" type="com.lee.Employee">
+        <id column="id" property="id"></id>
+        <result column="last_name" property="lastName"></result>
+        <result column="gender" property="email"></result>
+        <result column="gender" property="gender"></result>
+<!--        <result column="d_id" property="department.id"></result>-->
+<!--        <result column="dept_name" property="department.deptName"></result>-->
+
+        <association property="department" javaType="com.lee.Department">
+            <id property="id" column="d_id"></id>
+            <result property="deptName" column="dept_name"></result>
+        </association>
+
+    </resultMap>
+
+
+
+    <select id="selectEmp2" resultMap="emp" parameterType="java.lang.Integer">
+                select   t1.id,t1.last_name,t1.email,t1.gender,t1.d_id,t2.dept_name from tbl_employee t1 left join mybatis.tbl_dept t2 on t1.d_id=t2.id
+                where t1.id=#{id}
+    </select>
+
+
+    <resultMap id="dept" type="com.lee.Department">
+        <id column="dId" property="id"></id>
+        <result column="dept_name" property="deptName"></result>
+        <!--        <result column="d_id" property="department.id"></result>-->
+        <!--        <result column="dept_name" property="department.deptName"></result>-->
+
+        <collection property="employees" ofType="com.lee.Employee">
+            <id property="id" column="id"></id>
+            <result column="last_name" property="lastName"></result>
+            <result column="email" property="email"></result>
+            <result column="gender" property="gender"></result>
+        </collection>
+
+    </resultMap>
+
+
+    <select id="getDept" resultMap="dept" parameterType="java.lang.Integer">
+   select   t1.id,t1.last_name,t1.email,t1.gender,t1.d_id,t2.dept_name,t2.id as dId from tbl_employee t1
+   right join mybatis.tbl_dept t2 on t1.d_id=t2.id
+                where t2.id=#{id}
+    </select>
+    <select id="getEmpByDeptId" resultType="com.lee.Employee" parameterType="java.lang.Integer">
+        select * from mybatis.tbl_employee where d_id=#{id}
+    </select>
+
+
+    <!-- 查询员工，携带哪个字段就查询哪个字段 -->
+<!--    <select id="getEmsByCondition" resultType="com.lee.Employee">-->
+<!--        select * from mybatis.tbl_employee-->
+<!--        <where>-->
+<!--            <if test="lastName != null and lastName != ''">-->
+<!--                last_name like #{lastName}-->
+<!--            </if>-->
+<!--            <if test="email != null and email.trim() != ''">-->
+<!--                and email = #{email}-->
+<!--            </if>-->
+<!--            <if test="gender != null">-->
+<!--                and gender = #{gender}-->
+<!--            </if>-->
+<!--        </where>-->
+<!--    </select>-->
+
+
+<!--    <select id="getEmsByCondition" resultType="com.lee.Employee">-->
+
+<!--           select * from mybatis.tbl_employee-->
+<!--        <trim prefix="where" suffixOverrides="and">-->
+<!--           <if test="lastName != null and lastName != ''">-->
+<!--               last_name like #{lastName} and -->
+<!--           </if>-->
+<!--           <if test="email != null and email.trim() != ''">-->
+<!--               email = #{email} and-->
+<!--           </if>-->
+<!--           <if test="gender != null">-->
+<!--               gender = #{gender}-->
+<!--           </if>-->
+<!--        </trim>-->
+
+<!--    </select>-->
+
+
+    <select id="getEmsByCondition" resultType="com.lee.Employee">
+<bind name="_lastName" value="'%'+lastName+'%'"/>
+
+        select * from mybatis.tbl_employee
+
+<where>
+<choose>
+    <when  test="lastName != null and lastName != ''">
+        last_name like #{_lastName}
+    </when>
+
+    <when test="email != null and email.trim() != ''">
+        and email = #{email}
+    </when>
+
+    <when test="gender != null and gender != ''">
+        and gender = #{gender}
+    </when>
+
+    <otherwise>
+        and  email is null
+    </otherwise>
+
+</choose>
+
+
+
+</where>
+
+
+    </select>
+    <select id="getByIds" resultType="com.lee.Employee">
+
+        select * from mybatis.tbl_employee where id in
+        <foreach collection="ids" separator="," item="id" open="(" close=")">
+            #{id}
+        </foreach>
+
+
+
+    </select>
+    <select id="getByNamess" resultType="com.lee.Employee">
+        select * from mybatis.tbl_employee where last_name in
+        <foreach collection="names" separator="," item="name" open="(" close=")">
+            #{name}
+        </foreach>
+    </select>
+    <select id="firtLevelCache" resultType="com.lee.Employee">
+        select * from mybatis.tbl_employee where id=#{id}
+    </select>
+
+
+    <update id="updateByC">
+        update mybatis.tbl_employee
+        <set>
+            <if test="lastName != null">last_name=#{lastName},</if>
+            <if test="email != null">email=#{email},</if>
+            <if test="gender != null">gender=#{gender},</if>
+        </set>
+        where id=#{id}
+    </update>
+
+
+
+
+</mapper>
